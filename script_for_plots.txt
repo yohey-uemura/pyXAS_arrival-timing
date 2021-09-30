@@ -1,0 +1,174 @@
+import yaml
+########################Set parameters##################################
+#####data directory#####
+datdir = 'C:/Users/gac-x10da/Desktop/12Dec2019/2019Dec_Co4_night'
+# delays ={
+#     'preTime0': [0,70],
+#      'afterTime0_area1': [75,95],
+#      'afterTime0_area2': [100,115],
+#      'afterTime0_area3': [116,130],
+#      'afterTime0_area4': [131,150],
+#      'afterTime0_area5': [151,180],
+#      'afterTime0_area6': [220,240],
+#}
+# delaykeys = ['preTime0','afterTime0_area1','afterTime0_area2',
+#             'afterTime0_area3','afterTime0_area4','afterTime0_area5','afterTime0_area6']
+programroot = 'C:/Users/gac-x10da/Desktop/12Dec2019/scripts/ppXAS_arrtiming'
+dct_init = yaml.load(open(programroot +'/'+'init.yaml'))
+delays = dct_init['Areas']
+delaykeys = [x for x in dct_init['Areas'].keys()]
+print (delaykeys)
+
+colours = ['black','black','red','blue','orange','#006600','magenta','#000066',
+           'black','red','blue','orange','#006600','magenta','#000066',
+          'black','red','blue','orange','#006600','magenta','#000066']
+deltat = 20
+########################################################################
+
+def findNear(E0,Earray):
+    return np.argmin(np.abs(Earray-E0))
+
+def normXAS(Earray,XAS,Ebs,Ebe,Eas,Eae):
+    Earray = np.array(Earray)
+    XAS = np.array(XAS)
+    nbs = findNear(Ebs,Earray)
+    nbe = findNear(Ebe,Earray)
+    nas = findNear(Eas,Earray)
+    nae = findNear(Eae,Earray)
+#     print (nbs,nbe,nas,nae)
+    xasnorm = (XAS-np.average(XAS[nbs:nbe]))/(np.average(XAS[nas:nae])-np.average(XAS[nbs:nbe]))
+    normfactor = 1/(np.average(XAS[nas:nae])-np.average(XAS[nbs:nbe]))
+    return xasnorm, normfactor
+
+from silx import sx, gui
+sx.enable_gui()
+from silx.io.specfile import SpecFile
+import numpy as np
+import pandas as pd
+
+
+plot1d = gui.plot.Plot1D()
+
+sf = SpecFile(datdir+'/'+"2019Dec_Co4_night_shift_ver4.dat")
+XAS = sf['1.1']
+
+XASnorm, normF = normXAS(XAS.data[0],XAS.data[1],7.703,7.711,7.743,7.755)
+
+plot1d.addCurve(XAS.data[0]*1000,XASnorm,legend='GS',
+                yaxis='right',color='black',linestyle='--')
+
+dct = {'Energy [eV]': XAS.data[0],
+      'XASnorm': XASnorm,}
+dctkeys = ['Energy [eV]','XASnorm']
+
+yerr = 0.0
+for i in range(len(delaykeys)):
+    if i ==0:
+        pass
+    else:   
+        diffXAS = sf[str(i+1)+'.1']
+        if i == 1:
+            yerr = np.std(diffXAS.data[1]*normF)
+        txtlegend = '{:6.1f}'.format((((delays[delaykeys[i]][0]+delays[delaykeys[i]][1]))/2-100)*deltat)+' ns'
+        plot1d.addCurve(diffXAS.data[0]*1000,diffXAS.data[1]*normF,
+                        legend=txtlegend,color=colours[i],yerror=yerr)
+        dct[txtlegend] = diffXAS.data[1]*normF
+        dctkeys.append(txtlegend)
+dct['differror'] = np.ones(len(XASnorm))*yerr
+dctkeys.append('differror')
+
+pd.DataFrame(dct)[dctkeys].to_csv(datdir+'/'+'diffXAS_ver4.csv')
+
+plot1d.getXAxis().setLabel('Energy [ev]')
+plot1d.getYAxis(axis='right').setLabel('XAS')
+plot1d.getYAxis(axis='left').setLabel('$\Delta$XAS')
+plot1d.show()
+
+
+import yaml
+########################Set parameters##################################
+#####data directory#####
+datdir = 'C:/Users/gac-x10da/Desktop/12Dec2019/2019Dec_Co4_night'
+# delays ={
+#     'preTime0': [0,70],
+#      'afterTime0_area1': [75,95],
+#      'afterTime0_area2': [100,115],
+#      'afterTime0_area3': [116,130],
+#      'afterTime0_area4': [131,150],
+#      'afterTime0_area5': [151,180],
+#      'afterTime0_area6': [220,240],
+#}
+# delaykeys = ['preTime0','afterTime0_area1','afterTime0_area2',
+#             'afterTime0_area3','afterTime0_area4','afterTime0_area5','afterTime0_area6']
+programroot = 'C:/Users/gac-x10da/Desktop/12Dec2019/scripts/ppXAS_arrtiming'
+dct_init = yaml.load(open(programroot +'/'+'init.yaml'))
+delays = dct_init['Areas']
+delaykeys = [x for x in dct_init['Areas'].keys()]
+print (delaykeys)
+
+colours = ['black','black','red','blue','orange','#006600','magenta','#000066',
+           'black','red','blue','orange','#006600','magenta','#000066',
+          'black','red','blue','orange','#006600','magenta','#000066']
+deltat = 20
+########################################################################
+
+def findNear(E0,Earray):
+    return np.argmin(np.abs(Earray-E0))
+
+def normXAS(Earray,XAS,Ebs,Ebe,Eas,Eae):
+    Earray = np.array(Earray)
+    XAS = np.array(XAS)
+    nbs = findNear(Ebs,Earray)
+    nbe = findNear(Ebe,Earray)
+    nas = findNear(Eas,Earray)
+    nae = findNear(Eae,Earray)
+#     print (nbs,nbe,nas,nae)
+    xasnorm = (XAS-np.average(XAS[nbs:nbe]))/(np.average(XAS[nas:nae])-np.average(XAS[nbs:nbe]))
+    normfactor = 1/(np.average(XAS[nas:nae])-np.average(XAS[nbs:nbe]))
+    return xasnorm, normfactor
+
+from silx import sx, gui
+sx.enable_gui()
+from silx.io.specfile import SpecFile
+import numpy as np
+import pandas as pd
+
+
+plot1d = gui.plot.Plot1D()
+
+sf = SpecFile(datdir+'/'+"2019Dec_Co4_night_shift_ver5.dat")
+XAS = sf['1.1']
+
+XASnorm, normF = normXAS(XAS.data[0],XAS.data[1],7.703,7.711,7.743,7.755)
+
+plot1d.addCurve(XAS.data[0]*1000,XASnorm,legend='GS',
+                yaxis='right',color='black',linestyle='--')
+
+dct = {'Energy [eV]': XAS.data[0],
+      'XASnorm': XASnorm,}
+dctkeys = ['Energy [eV]','XASnorm']
+
+yerr = 0.0
+for i in range(len(delaykeys)):
+    if i ==0:
+        pass
+    else:   
+        XAS_ex = sf[str(i+1)+'.1']
+#         if i == 1:
+#             yerr = np.std(diffXAS.data[1]*normF)
+        XASnorm_ex, normF_ = normXAS(XAS_ex.data[0],XAS_ex.data[1],7.703,7.711,7.743,7.755)
+        txtlegend = '{:6.1f}'.format((((delays[delaykeys[i]][0]+delays[delaykeys[i]][1]))/2-100)*deltat)+' ns'
+        plot1d.addCurve(XAS_ex.data[0]*1000,XASnorm_ex-XASnorm,
+                        legend=txtlegend,color=colours[i],yerror=yerr)
+        dct[txtlegend] = XASnorm_ex-XASnorm
+        dctkeys.append(txtlegend)
+dct['differror'] = np.ones(len(XASnorm))*yerr
+dctkeys.append('differror')
+
+# pd.DataFrame(dct)[dctkeys].to_csv(datdir+'/'+'diffXAS_ver5.csv')
+
+plot1d.getXAxis().setLabel('Energy [ev]')
+plot1d.getYAxis(axis='right').setLabel('XAS')
+plot1d.getYAxis(axis='left').setLabel('$\Delta$XAS')
+plot1d.show()
+

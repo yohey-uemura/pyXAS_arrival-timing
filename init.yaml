@@ -1,0 +1,25 @@
+DataSets: ['202009211755_RuBpy-1.1W']
+
+DET: 'det1_Roi1'
+Areas:
+     'preTime0': [10,130]
+     #'beforeTime0_area0': [130,140]
+     #'beforeTime0_area1': [70,80]
+     #'beforeTime0_area2': [140,143]
+     'beforeTime0_area3': [135,145]
+     #'afterTime0_area1': [140,145]
+     #'afterTime0_area2': [145,150]
+     'afterTime0_area1': [150,160]
+     #'afterTime0_area2': [151,152]
+     #'afterTime0_area3': [152,155]
+     #'afterTime0_area4': [155,160]
+     #'afterTime0_area4': [155,160]
+     #'afterTime0_area5': [160,170]
+     #'afterTime0_area6': [175,185]
+     #'afterTime0_area7': [180,190]
+     #'afterTime0_area8': [190,200]
+     #'afterTime0_area9': [200,220]
+     #'afterTime0_area10': [220,240]
+Plots:
+     'difference': 'yes'
+     'NEG': 'preTime0'
